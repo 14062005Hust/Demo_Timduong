@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bản đồ với các đỉnh</title>
+    <script src="https://maps.gom/maps/api/js?key=AlzaSy4BLGoM_StkFcSF378JajckIIPZ8by06QQ"></script>
+    <style>
+        #map {
+            height: 500px; /* Chiều cao của bản đồ */
+            width: 100%; /* Chiều rộng của bản đồ */
+        }
+    </style>
+</head>
+<body>
+    <h3>Bản đồ với các đỉnh</h3>
+    <div id="map"></div>
+    <script>
+        function initMap() {
+            // Tọa độ trung tâm của bản đồ
+            var center = {lat: 21.0278, lng: 105.8342}; // Hà Nội
+
+            // Tạo bản đồ
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: center
+            });
+
+            // Danh sách các đỉnh
+            var locations = [
+                {lat: 21.0285, lng: 105.8041, title: "Đỉnh 1"},
+                {lat: 21.0290, lng: 105.8320, title: "Đỉnh 2"},
+                {lat: 21.0300, lng: 105.8340, title: "Đỉnh 3"}
+            ];
+
+            // Thêm các đỉnh lên bản đồ
+            locations.forEach(function(location) {
+                var marker = new google.maps.Marker({
+                    position: {lat: location.lat, lng: location.lng},
+                    map: map,
+                    title: location.title
+                });
+            });
+        }
+
+        // Khởi tạo bản đồ khi trang được tải
+        window.onload = initMap;
+    </script>
+</body>
+</html>

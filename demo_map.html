@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm đường đi ngắn nhất</title>
+    <style>
+        #map {
+            height: 80%;
+            width: 80%;
+            margin: auto;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://maps.gomaps.pro/maps/api/js?key=AlzaSy4BLGoM_StkFcSF378JajckIIPZ8by06QQ&libraries=places"></script>
+    <script>
+        let map;
+        let directionsService;
+        let directionsRenderer;
+
+        function initMap() {
+            // Khởi tạo bản đồ
+            var geocode = { lat: 21.005475843760088, lng: 105.84364874492508 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: geocode, 
+                zoom: 17
+            });
+            var marker = new google.maps.Marker({
+                position: geocode,
+                map: map
+            });
+
+            // Danh sách các đỉnh
+            var locations = [
+                {lat: 21.00698859515113, lng: 105.84313676418928, title: "Toà C1"},
+                {lat: 21.006430887292453, lng: 105.84238676189455, title: "Toà C2"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C3"},
+                {lat: 21.006179233709368, lng: 105.84410101756629, title: "Toà C4"},
+                
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C5"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C6"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C7"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C8"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C9"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C10"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D4"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D6"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D8"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D3"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D5"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D3-5"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D7"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà D9"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Thư Viện"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Hồ Tiền"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B1"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B3"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B4"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B5"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B6"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B7"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B7bis"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B8"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B9"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà B10"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Trạm Xá"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Nhà F"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà A15"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà A17"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Nhà E"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Nhà T"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "KTX Lào"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Sân Vận Động"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà TC"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Nhà Thi Đấu"}
+            ];
+           
+            // Thêm các đỉnh lên bản đồ
+            locations.forEach(function(location) {
+                var marker = new google.maps.Marker({
+                    position: {lat: location.lat, lng: location.lng},
+                    map: map,
+                    title: location.title
+                });
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+        }
+
+        function calculateRoute() {
+            const start = document.getElementById('start').value;
+            const end = document.getElementById('end').value;
+
+            const request = {
+                origin: start,
+                destination: end,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            directionsService.route(request, (result, status) => {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    alert('Không tìm thấy đường đi: ' + status);
+                }
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h1>Tìm đường đi ngắn nhất</h1>
+    <input type="text" id="start" placeholder="Điểm xuất phát">
+    <input type="text" id="end" placeholder="Điểm đến">
+    <button onclick="calculateRoute()">Tìm đường</button>
+    <div id="map"></div>
+</body>
+</html>
