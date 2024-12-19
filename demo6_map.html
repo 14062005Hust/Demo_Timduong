@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đường Đi Ngắn Nhất</title>
+  <style>
+    #map { height: 400px; width: 100%; }
+    #search { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h3>Đường Đi Ngắn Nhất Giữa Hai Điểm</h3>
+  <div id="search">
+    <label for="start">Điểm xuất phát:</label>
+    <select id="start">
+      <option value="">Chọn điểm xuất phát</option>
+      <option value="Toà C1">Toà C1</option>
+      <option value="Toà C2">Toà C2</option>
+      <option value="Toà C3">Toà C3</option>
+      <option value="Toà C4">Toà C4</option>
+    </select>
+
+    <label for="end">Điểm kết thúc:</label>
+    <select id="end">
+      <option value="">Chọn điểm kết thúc</option>
+      <option value="Toà C1">Toà C1</option>
+      <option value="Toà C2">Toà C2</option>
+      <option value="Toà C3">Toà C3</option>
+      <option value="Toà C4">Toà C4</option>
+    </select>
+
+    <button onclick="findRoute()">Tìm đường</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    var map, directionsService, directionsRenderer;
+
+    // Hàm khởi tạo bản đồ
+    function initMap() {
+      var haNoi = { lat: 21.005475843760088, lng: 105.84364874492508 };
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: haNoi,
+        zoom: 17
+      });
+
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+    }
+
+    // Hàm tìm đường từ điểm xuất phát đến điểm kết thúc
+    function findRoute() {
+      var start = document.getElementById("start").value;
+      var end = document.getElementById("end").value;
+
+      if (!start || !end) {
+        alert("Vui lòng chọn cả điểm xuất phát và điểm kết thúc.");
+        return;
+      }
+
+      // Gửi yêu cầu tới API C++ để tìm đường
+      fetch(`http://localhost:8080/findRoute?start=${start}&end=${end}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*' // CORS header nếu cần
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            alert(`Tìm thấy đường đi từ ${data.start} đến ${data.end}`);
+            var route = data.route; // Lấy dữ liệu route từ response
+
+            // Tạo các điểm trên bản đồ
+            var waypoints = route.map(function(point) {
+              return { location: new google.maps.LatLng(point.lat, point.lng), stopover: true };
+            });
+
+            var request = {
+              origin: new google.maps.LatLng(route[0].lat, route[0].lng),
+              destination: new google.maps.LatLng(route[route.length - 1].lat, route[route.length - 1].lng),
+              travelMode: google.maps.TravelMode.DRIVING,
+              waypoints: waypoints
+            };
+
+            directionsService.route(request, function(result, status) {
+              if (status === google.maps.DirectionsStatus.OK) {
+                directionsRenderer.setDirections(result);
+              } else {
+                alert("Có lỗi xảy ra khi tìm đường.");
+              }
+            });
+          }
+        })
+        .catch(error => {
+          alert("Có lỗi xảy ra: " + error);
+        });
+    }
+
+    // Khởi tạo bản đồ khi trang tải xong
+    window.onload = initMap;
+  </script>
+
+  <!-- Thay YOUR_GOOGLE_MAPS_API_KEY bằng API key của bạn -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtEsvOuKQEbpavwhV7yZDu_QZl_II3zBc&callback=initMap" async defer></script>
+
+</body>
+</html>

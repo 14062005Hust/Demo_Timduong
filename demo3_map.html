@@ -3,31 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đường Đi Ngắn Nhất trên Google Maps</title>
+  <title>Đường Đi Ngắn Nhất Trên HUST Maps</title>
   <style>
     #map {
       height: 400px;
-      width: 100%;
+      width: 80%;
+    }
+    #search{
+      margin-bottom: 5px;
     }
   </style>
 </head>
+
 <body>
 
-  <h3>Đường Đi Ngắn Nhất giữa Hai Điểm</h3>
+  <h3>Đường Đi Ngắn Nhất Giữa Hai Điểm</h3>
+  <div id="search">
+      <label for="start">Start:</label>
+      <select id="start">
+        <option value="">Choose a place </option>
+        <option value = "Toà C1">Toà C1</option>
+        <option value = "Toà C2">Toà C2</option>
+        <option value = "Toà C3">Toà C3</option>
+        <option value = "Toà C4">Toà C4</option>
+        <option value = "Toà C5">Toà C5</option>
+        <option value = "Toà C6">Toà C6</option>
+        <option value = "Toà C7">Toà C7</option>
+        <option value = "Toà C8">Toà C8</option>
+        <option value = "Toà C9">Toà C9</option>
+        <option value = "Toà C10">Toà C10</option>
+        <option value = "Toà D3">Toà D3</option>
+        <option value = "Toà D5">Toà D5</option>
+        <option value = "Toà D3-5">Toà D3-5</option>
+        <option value = "Toà D7">Toà D7</option>
+        <option value = "Toà D9">Toà D9</option>
+        <option value = "Toà D4">Toà D4</option>
+        <option value = "Toà D6">Toà D6</option>
+        <option value = "Toà D8">Toà D8</option>
+        <option value = "Toà B1">Toà B1</option>
+        <option value = "Trung tâm khảo thí Ngoại ngữ và Trao đổi văn hoá(CLC)">Trung tâm khảo thí Ngoại ngữ và Trao đổi văn hoá(CLC)</option>
+        <option value = "Thư Viện">Thư Viện</option>
+        <option value = "Hồ Tiền">Hồ Tiền</option>
+        <option value = "Trạm xá">Trạm xá</option>
+        <option value = "Toà T">Toà T</option>
+        <option value = "Toà TC">Toà TC</option>
+        <option value = "Sân vận động">Sân vận động</option>
+        <option value = "Nhà thi đấu">Nhà thi đấu</option>
+      </select>
+
+      <label for="end">End:</label>
+      <select id="end">
+        <option value="">Choose a place </option>
+        <option value = "Toà C1">Toà C1</option>
+        <option value = "Toà C2">Toà C2</option>
+        <option value = "Toà C3">Toà C3</option>
+        <option value = "Toà C4">Toà C4</option>
+        <option value = "Toà C5">Toà C5</option>
+        <option value = "Toà C6">Toà C6</option>
+        <option value = "Toà C7">Toà C7</option>
+        <option value = "Toà C8">Toà C8</option>
+        <option value = "Toà C9">Toà C9</option>
+        <option value = "Toà C10">Toà C10</option>
+        <option value = "Toà D3">Toà D3</option>
+        <option value = "Toà D5">Toà D5</option>
+        <option value = "Toà D3-5">Toà D3-5</option>
+        <option value = "Toà D7">Toà D7</option>
+        <option value = "Toà D9">Toà D9</option>
+        <option value = "Toà D4">Toà D4</option>
+        <option value = "Toà D6">Toà D6</option>
+        <option value = "Toà D8">Toà D8</option>
+        <option value = "Toà B1">Toà B1</option>
+        <option value = "Trung tâm khảo thí Ngoại ngữ và Trao đổi văn hoá(CLC)">Trung tâm khảo thí Ngoại ngữ và Trao đổi văn hoá(CLC)</option>
+        <option value = "Thư Viện">Thư Viện</option>
+        <option value = "Hồ Tiền">Hồ Tiền</option>
+        <option value = "Trạm xá">Trạm xá</option>
+        <option value = "Toà T">Toà T</option>
+        <option value = "Toà TC">Toà TC</option>
+        <option value = "Sân vận động">Sân vận động</option>
+        <option value = "Nhà thi đấu">Nhà thi đấu</option>
+      </select>
+
+      <button onclick="findShortestPath()">Tìm đường</button>
+  </div>
+
   <div id="map"></div>
+
 
   <!-- Thêm Google Maps JavaScript API -->
   <script src="https://maps.gomaps.pro/maps/api/js?key=AlzaSy4BLGoM_StkFcSF378JajckIIPZ8by06QQ&callback=initMap" async defer></script>
 
+
   <script>
     var map;
-    var coordinates = [
-      { lat: 21.005475843760088, lng: 105.84364874492508 }, // Tọa độ của điểm 0
-      { lat: 21.0065, lng: 105.8445 }, // Tọa độ của điểm 1
-      { lat: 21.0075, lng: 105.8450 }, // Tọa độ của điểm 2
-      { lat: 21.0080, lng: 105.8455 }, // Tọa độ của điểm 3
-      { lat: 21.0090, lng: 105.8460 }  // Tọa độ của điểm 4 (đỉnh mới)
-    ];
+    var markers= []; // Lưu trữ các marker
+    var pathPolyline; // Lưu trữ đường đi
+    // Danh sách các đỉnh
+    var locations = [
+                {lat: 21.00698859515113, lng: 105.84313676418928, title: "Toà C1"},
+                {lat: 21.006430887292453, lng: 105.84238676189455, title: "Toà C2"},
+                {lat: 21.00664363939205, lng: 105.843828639979, title: "Toà C3"},
+                {lat: 21.006182680961018, lng: 105.84409883484199, title: "Toà C4"},
+                {lat:21.00576871268214, lng: 105.84404766835202, title: "Toà C5"},
+                {lat: 21.005930685731766, lng: 105.84506419268367, title: "Toà C6"},
+                {lat: 21.005581689563275, lng: 105.84510439052353, title: "Toà C7"},
+                {lat: 21.005303993104107, lng: 105.84506017289968, title: "Toà C8"},
+                {lat: 21.00584062229857, lng: 105.84195287982332, title: "Toà C9"},
+                {lat: 21.00542165665716, lng: 105.84414678286305, title: "Toà C10"},
+            
+
+                {lat: 21.004269379801435, lng: 105.84207411426786, title: "Toà D4"},
+                {lat: 21.0043792447196, lng: 105.84270982748438, title: "Toà D6"},
+                {lat: 21.004059432490056, lng: 105.84296258095158, title: "Toà D8"},
+                {lat:  21.00480488870501, lng: 105.84498781679262, title: "Toà D3"},
+                {lat: 21.00438083629114, lng: 105.84497575744065, title: "Toà D5"},
+                {lat: 21.00467729783996, lng: 105.84528126102366, title: "Toà D3-5"},
+                {lat: 21.004084374138806, lng:  105.84488330240988, title: "Toà D7"},
+                {lat: 21.00382168567647, lng: 105.84426827545991, title: "Toà D9"},
+
+                {lat:21.006670972939215, lng: 105.84472599086526, title:"Trung tâm khảo thí Ngoại ngữ và Trao đổi văn hoá(CLC)"},
+                {lat: 21.00447395127941, lng: 105.84396191439095, title: "Thư Viện"},
+                {lat: 21.004106278134156, lng: 105.84334076492797, title: "Hồ Tiền"},
+                {lat: 21.004383954651804, lng: 105.84657498166882, title: "Toà B1"},
+                {lat: 21.005818138393412, lng: 105.84747666286742, title: "Trạm Xá"},
+                {lat: 21.0035338785898, lng:  105.84895995528602, title: "Toà T"},
+                {lat: 21.002230615052373, lng: 105.84782433102086, title: "Sân Vận Động"},
+                {lat: 21.00265881122414, lng:  105.84652456227381, title: "Toà TC"},
+                {lat: 21.003020732830596, lng: 105.847006540192, title: "Nhà Thi Đấu"}
+
+            ];
 
     function initMap() {
       var haNoi = { lat: 21.005475843760088, lng: 105.84364874492508 };
@@ -35,39 +138,71 @@
         center: haNoi,
         zoom: 17
       });
+      var marker = new google.maps.Marker({
+          position: haNoi,
+          map: map
+      });
 
       // Thêm các đỉnh lên bản đồ
-      coordinates.forEach(function(coordinates) {
-                var marker = new google.maps.Marker({
-                    position: {lat: coordinates.lat, lng: coordinates.lng},
-                    map: map,
-                    title: coordinates.title
-                });
-              });
+      locations.forEach(function(locations) {
+        const marker = new google.maps.Marker({
+            position: {lat: locations.lat, lng: locations.lng},
+            map: map,
+            title: locations.title
+        });
+        markers.push(marker);
+      });        
   }
 
-    function getShortestPath(start, end) {
+  // Lấy đường đi ngắn nhất từ API
+    function findShortestPath() {
+      var start = document.getElementById("start").value;
+      var end = document.getElementById("end").value;
+
+      if (start === "" || end === "") {
+        alert("Vui lòng chọn cả điểm xuất phát và điểm kết thúc.");
+        return;
+      }
+
+      // Gửi yêu cầu API
       fetch(`http://localhost:8080/getShortestPath?start=${start}&end=${end}`)
         .then(response => response.json())
         .then(data => {
-          var path = data.path.map((item) => coordinates[item]);
+          var path = data.path;
 
-          // Vẽ đường đi
-          var routePath = new google.maps.Polyline({
-            path: path,
+          // Kiểm tra nếu không có đường đi
+          if (!path || path.length === 0) {
+            alert("Không tìm thấy đường đi giữa hai điểm này.");
+            return;
+          }
+
+          // Xóa đường đi cũ nếu có
+          if (pathPolyline) {
+            pathPolyline.setMap(null);
+          }
+
+          // Vẽ đường đi mới
+          pathPolyline = new google.maps.Polyline({
+            path: path.map(loc => ({ lat: loc.lat, lng: loc.lng })),  // Chuyển đối tượng về dạng {lat, lng}
             geodesic: true,
             strokeColor: '#FF0000',
             strokeOpacity: 1.0,
             strokeWeight: 2
           });
-          routePath.setMap(map);
+          pathPolyline.setMap(map);
+
+          // Đảm bảo rằng bản đồ sẽ tự động điều chỉnh phạm vi để hiển thị đầy đủ đường đi
+          var bounds = new google.maps.LatLngBounds();
+          path.forEach(function(location) {
+            bounds.extend(new google.maps.LatLng(location.lat, location.lng));
+          });
+          map.fitBounds(bounds);
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+          console.error('Error:', error);
+          alert("Đã xảy ra lỗi khi tìm đường.");
+        });
     }
-
-    // Gọi hàm để lấy đường đi ngắn nhất
-    getShortestPath(0, 4); // Ví dụ tìm đường đi từ điểm 0 đến điểm 3
   </script>
-
 </body>
 </html>
